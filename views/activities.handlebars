@@ -1,0 +1,73 @@
+<main>
+    <!-- TODO this nav doesn't work visually -->
+    <nav class="navbar navbar-light bg-light border-bottom border-1 border-dark">
+        <div class="container-fluid">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><button type="button" name="back_button" id="back_button" class="btn"><img src="/public/images/back_button.png" alt="back_button"></button></li>
+            </ul>
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <h1>Trip to {{trip.destination}}</h1>
+                    <p>{{trip.month}} {{trip.start_day}} - {{trip.end_day}} {{trip.year}}</p>
+                    <p>{{trip.flights}} Flights | {{trip.hotel_stays}} Hotel Stays | {{trip.activities}} Activities</p>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><button type="button" name="edit_trip" id="edit_trip" class="btn"><img src="/public/images/edit_button.png" alt="edit_trip"></button></li>
+            </ul>
+    </nav>
+    <br>
+    <table class="table">
+        {{#each activities}}
+        <tr>
+            <td>
+                <div class="row">
+                    <div class="col-3">
+                        <img src="{{image_src}}" alt="type_icon">
+                    </div>
+                    <div class="col-9 border-start">
+                        {{#if flight}}
+                        <h1>{{departure_airport}} - {{arrival_airport}}</h1>
+                        <p>Departs: {{depart_date_time}}</p>
+                        <p>Arrives: {{arrives_date_time}}</p>
+                        <p>Flight {{flight_number}}</p>
+                        <p>Confirmation: {{confirmation_number}}</p>
+
+                        {{else if hotel_stay}}
+                        <h1>Stay at {{hotel_name}}</h1>
+                        {{#if start_date}}
+                        <p>Starts: {{start_date}}</p>
+                        {{else if end_date}}
+                        <p>Ends: {{end_date}}</p>
+                        {{/if}}
+                        <p>{{address}}</p>
+                        <p>Confirmation: {{confirmation_number}}</p>
+
+                        {{else if tour_event}}
+                        <h1>Tour of {{name}}</h1>
+                        <p>Starts: {{start_date_time}}</p>
+                        <p>{{address}}</p>
+                        <p>Confirmation: {{confirmation_number}}</p>
+
+                        {{else if bus_boat}}
+                        <h1>Ride from {{company}}</h1>
+                        <p>Departs: {{depart_date_time}}</p>
+                        <p>Arrives: {{arrives_date_time}}</p>
+                        <p>Number: {{number}}</p>
+                        <p>Confirmation: {{confirmation_number}}</p>
+                        {{/if}}
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {{/each}}
+    </table>
+</main>
+<footer class="footer mt-auto py-3 bg-primary">
+    <div class="d-grid">
+        <button type="button" name="add_new_activity" id="add_new_activity" class="btn btn-primary btn-lg mx-2">
+            <img src="/public/images/add_button.png" alt="add_new_activity">
+            Add New Activity
+        </button>
+    </div>
+</footer>
