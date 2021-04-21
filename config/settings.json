@@ -1,6 +1,6 @@
 {
     "mongoConfig": {
-      "serverUrl": "mongodb://localhost:27017/",
+      "serverUrl": "mongodb+srv://cluster0.miex7.mongodb.net/myFirstDatabase",
       "database": "trip_planner"
     }
 }
