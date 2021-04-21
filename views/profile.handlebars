@@ -2,7 +2,13 @@
     <nav class="navbar navbar-light bg-light border-bottom border-1 border-dark">
         <div class="container-fluid">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item"><button type="button" name="back_button" id="back_button" class="btn"><img src="/public/images/back_button.png" alt="back_button"></button></li>
+                <li class="nav-item">
+                    <a href="/trips" class="btn">
+                        <button type="button" name="back_button" id="back_button" class="btn">
+                            <img src="/public/images/back_button.png" alt="back_button">
+                        </button>
+                    </a>
+                </li>
             </ul>
             <ul class="navbar-nav mx-auto">
                 <li class="nav-item"><h1 class="center">My Profile</h1></li>
@@ -27,10 +33,13 @@
                 <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm Password" class="form-control">
             </label>
             <br><br>
-            <a href="TODO">Send Feedback</a>
+            <a href="/profile/feedback">Send Feedback</a>
 
             {{#if error}}
             <p class="error">{{error}}</p>
+            {{/if}}
+            {{#if success}}
+            <p class="text-success">{{success}}</p>
             {{/if}}
         </center>
 </main>

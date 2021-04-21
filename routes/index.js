@@ -12,6 +12,9 @@ const constructorMethod = (app) => {
   app.use('/profile', profile);
 
   app.get('/', (req, res) => {
+    if(req.session.user) {
+      res.redirect('trips');
+    }
     res.render('index', { title: "Trip Planner", form_action: "login", index: true });
   });
 

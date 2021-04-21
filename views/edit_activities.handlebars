@@ -2,7 +2,13 @@
     <nav class="navbar navbar-light bg-light border-bottom border-1 border-dark">
         <div class="container-fluid">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item"><button type="button" name="back_button" id="back_button" class="btn"><img src="/public/images/back_button.png" alt="back_button"></button></li>
+                <li class="nav-item">
+                    <a href="/activities/{{trip_id}}">
+                        <button type="button" name="back_button" id="back_button" class="btn">
+                            <img src="/public/images/back_button.png" alt="back_button">
+                        </button>
+                    </a>
+                </li>
             </ul>
             <ul class="navbar-nav mx-auto">
                 <li class="nav-item"><h1 class="center">Edit Activity</h1></li>
@@ -10,7 +16,7 @@
         </div>
     </nav>
     <br>
-    <form action="/activities/edit/{{id}}" method="POST">
+    <form action="/activities/edit/{{trip_id}}/{{id}}/{{type}}" method="POST">
         <center>
             {{#if flight}}
             <label>
@@ -28,7 +34,6 @@
                     <input type="time" id="departure_time" name="departure_time" value="{{flight.departure_time}}" class="form-control">
                     <input type="text" id="departure_time_zone" name="departure_time_zone" placeholder="Time Zone" value="{{flight.departure_time_zone}}" class="form-control">
                 </div>
-                <!-- TODO? it'd be cool to make the time zone inputs into selects -->
             </label>
             <br><br>
             <label>
@@ -41,7 +46,6 @@
                     <input type="time" id="arrival_time" name="arrival_time" value="{{flight.arrival_time}}" class="form-control">
                     <input type="text" id="arrival_time_zone" name="arrival_time_zone" placeholder="Time Zone" value="{{flight.arrival_time_zone}}" class="form-control">
                 </div>
-                <!-- TODO? it'd be cool to make the time zone inputs into selects -->
             </label>
             <br><br>
             <label>
@@ -95,7 +99,6 @@
                     <input type="time" id="start_time" name="start_time" value="{{tour_event.start_time}}" class="form-control">
                 </div>
                 <input type="text" id="time_zone" name="time_zone" placeholder="time_zone" value="{{tour_event.time_zone}}" class="form-control">
-                <!-- TODO? it'd be cool to make the time zone inputs into selects -->
             </label>
             <br><br>
             <label>
@@ -122,7 +125,6 @@
                     <input type="time" id="departure_time" name="departure_time" value="{{bus_boat.departure_time}}" class="form-control">
                 </div>
                 <input type="text" id="departure_time_zone" name="departure_time_zone" placeholder="Time Zone" value="{{bus_boat.departure_time_zone}}" class="form-control">
-                <!-- TODO? it'd be cool to make the time zone inputs into selects -->
             </label>
             <br><br>
             <label>
@@ -132,7 +134,6 @@
                     <input type="time" id="arrival_time" name="arrival_time" value="{{bus_boat.arrival_time}}" class="form-control">
                 </div>
                 <input type="text" id="arrival_time_zone" name="arrival_time_zone" placeholder="Time Zone" value="{{bus_boat.arrival_time_zone}}" class="form-control">
-                <!-- TODO? it'd be cool to make the time zone inputs into selects -->
             </label>
             <br><br>
             <label>
@@ -156,15 +157,18 @@
                 <div class="col-6 bg-primary">
                     <center>
                     <div class="d-grid">
-                        <button type="submit" name="add_activity" id="add_activity" class="btn btn-primary btn-lg mx-2">Save Activity Changes</button>
+                        <button type="submit" name="save_activity" id="save_activity" class="btn btn-primary btn-lg mx-2">Save Activity Changes</button>
+    </form>
                     </div>
                     </center>
                 </div>
                 <div class="col-6 bg-danger">
                     <div class="d-grid">
-                        <button type="button" name="delete_activity" id="delete_activity" class="btn btn-danger btn-lg mx-2">Delete Activity</button>
+                        <form action="/activities/delete/{{trip_id}}/{{id}}" method="POST"> 
+                            <button type="submit" name="delete_activity" id="delete_activity" class="btn btn-danger btn-lg mx-2">Delete Activity</button>
+                        </form>
                     </div>
                 </div>
             </div>
         </footer>
-    </form>
+    

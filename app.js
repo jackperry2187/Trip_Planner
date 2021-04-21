@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const static = express.static(__dirname + '/public');
+const session = require('express-session');
 const configRoutes = require('./routes');
 const exphbs = require('express-handlebars');
 
@@ -40,6 +41,16 @@ app.use(rewriteUnsupportedBrowserMethods);
 // using express handlebars
 app.engine('handlebars', handlebarsInstance.engine);
 app.set('view engine', 'handlebars');
+
+app.use(
+  session({
+    name: 'trip_planner',
+    secret: "There is no war in Ba Sing Se",
+    saveUninitialized: true,
+    resave: false,
+    cookie: { maxAge: 600000 }
+  })
+);
 
 configRoutes(app);
 
