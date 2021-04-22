@@ -21,3 +21,23 @@ td a {
     color: black;
     text-decoration: none;
 }
+
+.btn-primary {
+    background-color: #E2D3AE;
+    border-color: #E2D3AE;
+    color: darkslategrey;
+}
+
+.bg-primary {
+    background-color: #E2D3AE!important;
+}
+
+.btn-primary.active {
+    background-color: #EDBF71;
+    border-color: #EDBF71;
+    color: darkslategrey;
+}
+
+.btn-group a {
+    text-decoration: none;
+}
