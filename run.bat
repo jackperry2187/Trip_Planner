@@ -1,4 +1,4 @@
 @ECHO OFF
-npm i
+call npm i
 START http://localhost:3000/
-npm start
+call npm start
