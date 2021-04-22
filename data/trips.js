@@ -30,7 +30,7 @@ const create = async(id, destination, startDate, endDate) => {
     let updatedInfo = await userList.updateOne({_id: ObjectId(id)}, {$set: user});
     if(updatedInfo.modifiedCount === 0) throw "could not update book";
 
-    return true;
+    return theTrip;
 };
 
 const readAll = async(id) => {
