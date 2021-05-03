@@ -26,8 +26,7 @@ router.get('/', async (req, res) => {
                             "July", "August", "September", "October", "November", "December"];
         theTrips[trip].month = monthNames[start_date.getMonth()];
         theTrips[trip].start_day = start_date.getDate()+1; 
-        if(start_date.getMonth() == end_date.getMonth()) theTrips[trip].end_day = end_date.getDate()+1;  
-        else theTrips[trip].end_day = monthNames[end_date.getMonth()] + " " + end_date.getDate()+1; 
+        theTrips[trip].end_day = end_date.getDate()+1 + " " + monthNames[end_date.getMonth()]; 
         theTrips[trip].year = end_date.getFullYear();
         theTrips[trip]._id = theTrips[trip]._id.toString();
     }

@@ -25,7 +25,22 @@
             </div>
         </div>
     </nav>
+    {{#if selection_date_exists}}
+    <div class="row border">
+        <div class="col-12 my-2 mx-3">
+            <a href="/activities/{{trip.id}}/">
+                <button type="button" class="btn btn-primary btn-circle">All</button>
+            </a>
+            {{#each selection_date}}
+            <a href="/activities/{{../trip.id}}/{{this}}">
+                <button type="button" class="btn btn-primary btn-circle">{{this}}</button>
+            </a>
+            {{/each}}
+        </div>
+    </div>
+    {{else}}
     <br>
+    {{/if}}
     <table class="table" id="sortThis">
         {{#each activities}}
         <tr>
@@ -91,6 +106,7 @@
     <div class="d-grid">
         <a href="/activities/add/{{trip._id}}/flight" class="btn btn-primary btn-lg mx-2">
             <button type="button" name="add_new_activity" id="add_new_activity" class="btn btn-primary btn-lg mx-2">
+                <img src="/public/images/add_button.png" alt="add_trip">
                 Add New Activity
             </button>
         </a>

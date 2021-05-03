@@ -51,7 +51,11 @@ router.post('/', async (req, res) => {
 });
 
 router.post('/feedback', async (req, res) => {
-    //TODO send feedback... somewhere?
+    if(!req.session.user) {
+        res.redirect('/');
+        return;
+    }
+    res.render('feedback', { title: "Feedback", success: "Feedback sent!" });
 });
 
 module.exports = router;

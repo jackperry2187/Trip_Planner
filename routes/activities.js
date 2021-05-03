@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const tripData = require('../data/trips');
 const activityData = require('../data/activities');
-const e = require('express');
 
 router.get('/:tripid', async (req, res) => {
     if(!req.session.user) {
@@ -11,23 +10,43 @@ router.get('/:tripid', async (req, res) => {
     }
     let tripId = req.params.tripid;
     let theActivities = await activityData.readAll(req.session.user._id, tripId);
+    let selectionDates = [];
+    let selectionDatesExists = true;
+    if(theActivities.length == 0 || theActivities == null) {
+        selectionDatesExists = false;
+    }
     for(let x in theActivities) {
         theActivities[x].id = theActivities[x]._id.toString();
         if(theActivities[x].type == "flight") {
             theActivities[x].flight = true;
             theActivities[x].info.depart_date_time = theActivities[x].info.departure_date + " " + theActivities[x].info.departure_time + " " + theActivities[x].info.departure_time_zone;
             theActivities[x].info.arrives_date_time = theActivities[x].info.arrival_date + " " + theActivities[x].info.arrival_time + " " + theActivities[x].info.arrival_time_zone; 
+            let theDate = theActivities[x].info.departure_date.split('-');
+            selectionDates.push(theDate[1] + "-" + theDate[2]);
         }
         if(theActivities[x].type == "hotel_stay") {
             theActivities[x].hotel_stay = true;
             let copyActivity = JSON.parse(JSON.stringify(theActivities[x]));
             copyActivity.info.start_date = null;
-            
             theActivities.push(copyActivity);
+
+            let theDate = theActivities[x].info.start_date.split('-');
+            selectionDates.push(theDate[1] + "-" + theDate[2]);
         }
-        if(theActivities[x].type == "tour_event") theActivities[x].tour_event = true;
-        if(theActivities[x].type == "bus_boat") theActivities[x].bus_boat = true;
+        if(theActivities[x].type == "tour_event") {
+            theActivities[x].tour_event = true;
+
+            let theDate = theActivities[x].info.start_date_time.split(' ')[0].split('-');
+            selectionDates.push(theDate[1] + "-" + theDate[2]);
+        }
+        if(theActivities[x].type == "bus_boat") {
+            theActivities[x].bus_boat = true;
+
+            let theDate = theActivities[x].info.depart_date_time.split(' ')[0].split('-');
+            selectionDates.push(theDate[1] + "-" + theDate[2]);
+        }
     }
+    selectionDates = [...new Set(selectionDates)];
     let theTrip = await tripData.read(req.session.user._id, tripId); 
     theTrip.id = tripId;
     let start_date = new Date(theTrip.startDate);
@@ -39,8 +58,70 @@ router.get('/:tripid', async (req, res) => {
     if(start_date.getMonth() == end_date.getMonth()) theTrip.end_day = end_date.getDate()+1;  
     else theTrip.end_day = monthNames[end_date.getMonth()] + " " + end_date.getDate()+1; 
     theTrip.year = end_date.getFullYear();
-    
-    res.render('activities', { title: "Activities", activities: theActivities, trip: theTrip, script: "activities" });
+    res.render('activities', { title: "Activities", activities: theActivities, trip: theTrip, script: "activities", selection_date: selectionDates, selection_date_exists: selectionDatesExists });
+}); 
+
+router.get('/:tripid/:date', async (req, res) => {
+    if(!req.session.user) {
+        res.redirect('/');
+        return;
+    }
+    let tripId = req.params.tripid;
+    let theActivities = await activityData.readAll(req.session.user._id, tripId);
+    let selectionDates = [];
+    let selectionDatesExists = true;
+    if(theActivities.length == 0 || theActivities == null) {
+        selectionDatesExists = false;
+    }
+    for(let x in theActivities) {
+        theActivities[x].id = theActivities[x]._id.toString();
+        if(theActivities[x].type == "flight") {
+            theActivities[x].flight = true;
+            theActivities[x].info.depart_date_time = theActivities[x].info.departure_date + " " + theActivities[x].info.departure_time + " " + theActivities[x].info.departure_time_zone;
+            theActivities[x].info.arrives_date_time = theActivities[x].info.arrival_date + " " + theActivities[x].info.arrival_time + " " + theActivities[x].info.arrival_time_zone; 
+            let theDate = theActivities[x].info.departure_date.split('-');
+            if(req.params.date.localeCompare(theDate[1] + "-" + theDate[2]) != 0) theActivities[x] = null;
+            selectionDates.push(theDate[1] + "-" + theDate[2]);
+        }
+        else if(theActivities[x].type == "hotel_stay") {
+            theActivities[x].hotel_stay = true;
+            let copyActivity = JSON.parse(JSON.stringify(theActivities[x]));
+            copyActivity.info.start_date = null;
+            theActivities.push(copyActivity);
+
+            let theDate = theActivities[x].info.start_date.split('-');
+            if(req.params.date.localeCompare(theDate[1] + "-" + theDate[2]) != 0) theActivities[x] = null;
+            selectionDates.push(theDate[1] + "-" + theDate[2]);
+        }
+        else if(theActivities[x].type == "tour_event") {
+            theActivities[x].tour_event = true;
+
+            let theDate = theActivities[x].info.start_date_time.split(' ')[0].split('-');
+            if(req.params.date.localeCompare(theDate[1] + "-" + theDate[2]) != 0) theActivities[x] = null;
+            selectionDates.push(theDate[1] + "-" + theDate[2]);
+        }
+        else if(theActivities[x].type == "bus_boat") {
+            theActivities[x].bus_boat = true;
+
+            let theDate = theActivities[x].info.depart_date_time.split(' ')[0].split('-');
+            if(req.params.date.localeCompare(theDate[1] + "-" + theDate[2]) != 0) theActivities[x] = null;
+            selectionDates.push(theDate[1] + "-" + theDate[2]);
+        }
+    }
+    selectionDates = [...new Set(selectionDates)];
+    theActivities = theActivities.filter(x => x !== null);
+    let theTrip = await tripData.read(req.session.user._id, tripId); 
+    theTrip.id = tripId;
+    let start_date = new Date(theTrip.startDate);
+    let end_date = new Date(theTrip.endDate);
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December"];
+    theTrip.month = monthNames[start_date.getMonth()];
+    theTrip.start_day = start_date.getDate()+1; 
+    if(start_date.getMonth() == end_date.getMonth()) theTrip.end_day = end_date.getDate()+1;  
+    else theTrip.end_day = monthNames[end_date.getMonth()] + " " + end_date.getDate()+1; 
+    theTrip.year = end_date.getFullYear();
+    res.render('activities', { title: "Activities", activities: theActivities, trip: theTrip, script: "activities", selection_date: selectionDates, selection_date_exists: selectionDatesExists });
 }); 
 
 router.get('/add/:tripid/:type', async (req, res) => {
@@ -128,7 +209,6 @@ router.get('/edit/:tripid/:id', async (req, res) => {
         pushActivity.name = info.name;
         pushActivity.start_date = info.start_date_time.split(" ")[0];
         pushActivity.start_time = info.start_date_time.split(" ")[1];
-        pushActivity.time_zone = info.start_date_time.split(" ")[2];
         pushActivity.address = info.address;
         pushActivity.confirmation_number = info.confirmation_number;
         paramObject.tour_event = pushActivity;
@@ -140,10 +220,8 @@ router.get('/edit/:tripid/:id', async (req, res) => {
         pushActivity.company = info.company;
         pushActivity.departure_date = info.depart_date_time.split(" ")[0];
         pushActivity.departure_time = info.depart_date_time.split(" ")[1];
-        pushActivity.departure_time_zone = info.depart_date_time.split(" ")[2];
         pushActivity.arrival_date = info.arrives_date_time.split(" ")[0];
         pushActivity.arrival_time = info.arrives_date_time.split(" ")[1];
-        pushActivity.arrival_time_zone = info.arrives_date_time.split(" ")[2];
         pushActivity.number = info.number;
         pushActivity.confirmation_number = info.confirmation_number;
         paramObject.bus_boat = pushActivity;
@@ -190,9 +268,9 @@ router.post('/:tripid/:type', async (req, res) => {
             created = await activityData.create(req.session.user._id, tripid, "hotel_stay", theInfo);
         }
         else if(type == "tour_event") {
-            if(!req.body.name || !req.body.start_date || !req.body.start_time || !req.body.time_zone || !req.body.address || !req.body.confirmation_number) throw "Please fill out all fields!";
+            if(!req.body.name || !req.body.start_date || !req.body.start_time || !req.body.address || !req.body.confirmation_number) throw "Please fill out all fields!";
             theInfo.name = req.body.name;
-            theInfo.start_date_time = req.body.start_date + " " + req.body.start_time + " " + req.body.time_zone;
+            theInfo.start_date_time = req.body.start_date + " " + req.body.start_time;
             theInfo.address = req.body.address;
             theInfo.confirmation_number = req.body.confirmation_number;
             theInfo.image_src = "/public/images/compass_icon.png";
@@ -200,11 +278,11 @@ router.post('/:tripid/:type', async (req, res) => {
             created = await activityData.create(req.session.user._id, tripid, "tour_event", theInfo);
         }
         else if(type == "bus_boat") {
-            if(!req.body.company || !req.body.departure_date || !req.body.departure_time || !req.body.departure_time_zone || !req.body.arrival_date || !req.body.arrival_time ||
-                 !req.body.arrival_time_zone  || !req.body.number || !req.body.confirmation_number) throw "Please fill out all fields!";
+            if(!req.body.company || !req.body.departure_date || !req.body.departure_time || !req.body.arrival_date || !req.body.arrival_time ||
+                 !req.body.number || !req.body.confirmation_number) throw "Please fill out all fields!";
             theInfo.company = req.body.company;
-            theInfo.depart_date_time = req.body.departure_date + " " + req.body.departure_time + " " + req.body.departure_time_zone;
-            theInfo.arrives_date_time = req.body.arrival_date + " " + req.body.arrival_time + " " + req.body.arrival_time_zone;
+            theInfo.depart_date_time = req.body.departure_date + " " + req.body.departure_time;
+            theInfo.arrives_date_time = req.body.arrival_date + " " + req.body.arrival_time;
             theInfo.number = req.body.number;
             theInfo.confirmation_number = req.body.confirmation_number;
             theInfo.image_src = "/public/images/bus_boat_icon.png";
@@ -289,9 +367,9 @@ router.post('/edit/:tripid/:id/:type', async (req, res) => {
             updated = await activityData.update(req.session.user._id, tripid, id, theInfo);
         }
         else if(type == "tour_event") {
-            if(!req.body.name || !req.body.start_date || !req.body.start_time || !req.body.time_zone || !req.body.address || !req.body.confirmation_number) throw "Please fill out all fields!";
+            if(!req.body.name || !req.body.start_date || !req.body.start_time || !req.body.address || !req.body.confirmation_number) throw "Please fill out all fields!";
             theInfo.name = req.body.name;
-            theInfo.start_date_time = req.body.start_date + " " + req.body.start_time + " " + req.body.time_zone;
+            theInfo.start_date_time = req.body.start_date + " " + req.body.start_time;
             theInfo.address = req.body.address;
             theInfo.confirmation_number = req.body.confirmation_number;
             theInfo.image_src = "/public/images/compass_icon.png";
@@ -299,11 +377,11 @@ router.post('/edit/:tripid/:id/:type', async (req, res) => {
             updated = await activityData.update(req.session.user._id, tripid, id, theInfo);
         }
         else if(type == "bus_boat") {
-            if(!req.body.company || !req.body.departure_date || !req.body.departure_time || !req.body.departure_time_zone || !req.body.arrival_date || !req.body.arrival_time ||
-                !req.body.arrival_time_zone  || !req.body.number || !req.body.confirmation_number) throw "Please fill out all fields!";
+            if(!req.body.company || !req.body.departure_date || !req.body.departure_time || !req.body.arrival_date || !req.body.arrival_time ||
+                !req.body.number || !req.body.confirmation_number) throw "Please fill out all fields!";
             theInfo.company = req.body.company;
-            theInfo.depart_date_time = req.body.departure_date + " " + req.body.departure_time + " " + req.body.departure_time_zone;
-            theInfo.arrives_date_time = req.body.arrival_date + " " + req.body.arrival_time + " " + req.body.arrival_time_zone;
+            theInfo.depart_date_time = req.body.departure_date + " " + req.body.departure_time;
+            theInfo.arrives_date_time = req.body.arrival_date + " " + req.body.arrival_time;
             theInfo.number = req.body.number;
             theInfo.confirmation_number = req.body.confirmation_number;
             theInfo.image_src = "/public/images/bus_boat_icon.png";
@@ -359,7 +437,6 @@ router.post('/edit/:tripid/:id/:type', async (req, res) => {
             pushActivity.name = info.name;
             pushActivity.start_date = info.start_date_time.split(" ")[0];
             pushActivity.start_time = info.start_date_time.split(" ")[1];
-            pushActivity.time_zone = info.start_date_time.split(" ")[2];
             pushActivity.address = info.address;
             pushActivity.confirmation_number = info.confirmation_number;
             paramObject.tour_event = pushActivity;
@@ -371,10 +448,8 @@ router.post('/edit/:tripid/:id/:type', async (req, res) => {
             pushActivity.company = info.company;
             pushActivity.departure_date = info.depart_date_time.split(" ")[0];
             pushActivity.departure_time = info.depart_date_time.split(" ")[1];
-            pushActivity.departure_time_zone = info.depart_date_time.split(" ")[2];
             pushActivity.arrival_date = info.arrives_date_time.split(" ")[0];
             pushActivity.arrival_time = info.arrives_date_time.split(" ")[1];
-            pushActivity.arrival_time_zone = info.arrives_date_time.split(" ")[2];
             pushActivity.number = info.number;
             pushActivity.confirmation_number = info.confirmation_number;
             paramObject.bus_boat = pushActivity;
@@ -438,7 +513,6 @@ router.post('/delete/:tripid/:id', async (req, res) => {
             pushActivity.name = info.name;
             pushActivity.start_date = info.start_date_time.split(" ")[0];
             pushActivity.start_time = info.start_date_time.split(" ")[1];
-            pushActivity.time_zone = info.start_date_time.split(" ")[2];
             pushActivity.address = info.address;
             pushActivity.confirmation_number = info.confirmation_number;
             paramObject.tour_event = pushActivity;
@@ -450,10 +524,8 @@ router.post('/delete/:tripid/:id', async (req, res) => {
             pushActivity.company = info.company;
             pushActivity.departure_date = info.depart_date_time.split(" ")[0];
             pushActivity.departure_time = info.depart_date_time.split(" ")[1];
-            pushActivity.departure_time_zone = info.depart_date_time.split(" ")[2];
             pushActivity.arrival_date = info.arrives_date_time.split(" ")[0];
             pushActivity.arrival_time = info.arrives_date_time.split(" ")[1];
-            pushActivity.arrival_time_zone = info.arrives_date_time.split(" ")[2];
             pushActivity.number = info.number;
             pushActivity.confirmation_number = info.confirmation_number;
             paramObject.bus_boat = pushActivity;
