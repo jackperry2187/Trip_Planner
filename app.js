@@ -48,7 +48,7 @@ app.use(
     secret: "There is no war in Ba Sing Se",
     saveUninitialized: true,
     resave: false,
-    cookie: { maxAge: 600000 }
+    cookie: { maxAge: 6000000 }
   })
 );
 

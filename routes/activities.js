@@ -32,6 +32,9 @@ router.get('/:tripid', async (req, res) => {
 
             let theDate = theActivities[x].info.start_date.split('-');
             selectionDates.push(theDate[1] + "-" + theDate[2]);
+
+            let theDate1 = theActivities[x].info.end_date.split('-');
+            selectionDates.push(theDate1[1] + "-" + theDate1[2]);
         }
         if(theActivities[x].type == "tour_event") {
             theActivities[x].tour_event = true;
@@ -47,6 +50,7 @@ router.get('/:tripid', async (req, res) => {
         }
     }
     selectionDates = [...new Set(selectionDates)];
+    selectionDates.sort();
     let theTrip = await tripData.read(req.session.user._id, tripId); 
     theTrip.id = tripId;
     let start_date = new Date(theTrip.startDate);
@@ -86,12 +90,17 @@ router.get('/:tripid/:date', async (req, res) => {
         else if(theActivities[x].type == "hotel_stay") {
             theActivities[x].hotel_stay = true;
             let copyActivity = JSON.parse(JSON.stringify(theActivities[x]));
-            copyActivity.info.start_date = null;
-            theActivities.push(copyActivity);
 
             let theDate = theActivities[x].info.start_date.split('-');
             if(req.params.date.localeCompare(theDate[1] + "-" + theDate[2]) != 0) theActivities[x] = null;
             selectionDates.push(theDate[1] + "-" + theDate[2]);
+
+            copyActivity.info.start_date = null;
+            let theDate1 = copyActivity.info.end_date.split('-');
+            if(req.params.date.localeCompare(theDate1[1] + "-" + theDate1[2]) == 0) {
+                theActivities.push(copyActivity);
+            }
+            selectionDates.push(theDate1[1] + "-" + theDate1[2]);
         }
         else if(theActivities[x].type == "tour_event") {
             theActivities[x].tour_event = true;
@@ -109,6 +118,7 @@ router.get('/:tripid/:date', async (req, res) => {
         }
     }
     selectionDates = [...new Set(selectionDates)];
+    selectionDates.sort();
     theActivities = theActivities.filter(x => x !== null);
     let theTrip = await tripData.read(req.session.user._id, tripId); 
     theTrip.id = tripId;
